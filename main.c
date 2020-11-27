@@ -2,17 +2,17 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
-#include <pthread.h>
 #include <unistd.h>
 
 int memoria_fisica_maxsize = 20;
 int memoria_logica_maxsize = 10;
-int pagina_maxsize;
-int quadro_maxsize;
+int pagina_maxsize = 2;
+int memoria_fisica[20][2];
 
 typedef struct node
 {
     int key;
+    int page;
     struct node *next;
 
 } Node;
@@ -22,6 +22,7 @@ typedef struct list
     Node *head;
     int size;
     int max_size;
+    int id;
 } List;
 
 Node *createnode(int key)
@@ -102,15 +103,32 @@ void visualizarMemoriaFisica();
 void criarProcesso();
 void visualizarTabelaPagina();
 
+int getRandomValues()
+{
+    int random;
+    random = (rand() % 150 + 1);
+    return random;
+}
+
+void alocarProcessoNaMemoriaFisica(List *process)
+{
+    //to do alocar na memora fisica
+}
+
 void criarProcesso()
 {
     int process_id;
     int process_size;
 
-    while (process_size != 0)
+    while (process_size != 0 && process_size > memoria_fisica_maxsize)
     {
         printf("DIGITE O TAMANHO DO PROCESSO\n");
         scanf("%i", &process_size);
+        if (process_size > memoria_fisica_maxsize)
+        {
+            printf("TAMANHO É MAIOR QUE A MEMORIA, DIGITE UM TAMANHO MENOR");
+            scanf("%i", &process_size);
+        }
         break;
     }
 
@@ -121,14 +139,21 @@ void criarProcesso()
         break;
     }
 
-    int process[process_size][pagina_maxsize];
+    //int process[process_size][pagina_maxsize];
+    List *process = makelist();
+    process->id = process_id;
+    process->max_size = process_size;
     for (size_t i = 0; i < process_size; i++)
     {
-        int x = (rand()%150+1);
-        int y = (rand()%150+1);
-        int page[2] = {x,y};
-        process[i][i] = *page;
+        int page[pagina_maxsize];
+        for (size_t t = 0; t < pagina_maxsize; t++)
+        {
+            page[t] = getRandomValues();
+        }
+        add(*page, process);
     }
+
+    alocarProcessoNaMemoriaFisica(process);
 }
 
 void visualizarTabelaPagina()
@@ -138,12 +163,17 @@ void visualizarTabelaPagina()
 
 void visualizarMemoriaFisica()
 {
-    printf("faz o role\n\n");
+    printf("processo -- quadro \n");
+    for (int i = 0; i < memoria_fisica_maxsize; i++)
+    {
+
+        printf("%d -- %d \n", i, memoria_fisica[i]);
+    }
 }
 
 int main(void)
 {
-    int memoria[10];
+
     int opcao;
     time_t t;
 
@@ -160,7 +190,7 @@ int main(void)
         switch (opcao)
         {
         case 1:
-            visualizarMemoriaFisica(memoria);
+            visualizarMemoriaFisica();
             break;
 
         case 2:
@@ -179,15 +209,4 @@ int main(void)
             printf("OPÇÃO INVÁLIDA\n\n");
         }
     }
-
-    List *frame;
-    frame = makelist();
-
-    add(1, frame);
-    add(4, frame);
-    add(8, frame);
-    add(3, frame);
-    add(5, frame);
-    pop(frame);
-    display(frame);
 }
