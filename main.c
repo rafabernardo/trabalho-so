@@ -1,15 +1,14 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
 
-int memoria_fisica_maxsize;
-int memoria_logica_maxsize;
+int memoria_fisica_maxsize = 20;
+int memoria_logica_maxsize = 10;
 int pagina_maxsize;
 int quadro_maxsize;
-
-
 
 typedef struct node
 {
@@ -121,6 +120,15 @@ void criarProcesso()
         scanf("%i", &process_id);
         break;
     }
+
+    int process[process_size][pagina_maxsize];
+    for (size_t i = 0; i < process_size; i++)
+    {
+        int x = (rand()%150+1);
+        int y = (rand()%150+1);
+        int page[2] = {x,y};
+        process[i][i] = *page;
+    }
 }
 
 void visualizarTabelaPagina()
@@ -137,6 +145,7 @@ int main(void)
 {
     int memoria[10];
     int opcao;
+    time_t t;
 
     while (opcao != 0)
     {
