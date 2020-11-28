@@ -4,10 +4,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-int memoria_fisica_maxsize = 20;
-int memoria_logica_maxsize = 10;
-int pagina_maxsize = 2;
-int memoria_fisica[20][2];
+int memoria_fisica_maxsize;
+int memoria_logica_maxsize;
+int pagina_maxsize;
+int memoria_fisica[20];
 
 typedef struct node
 {
@@ -99,10 +99,6 @@ int pop(List *list)
     return retval;
 }
 
-void visualizarMemoriaFisica();
-void criarProcesso();
-void visualizarTabelaPagina();
-
 int getRandomValues()
 {
     int random;
@@ -122,11 +118,11 @@ void criarProcesso()
 
     while (process_size != 0 && process_size > memoria_fisica_maxsize)
     {
-        printf("DIGITE O TAMANHO DO PROCESSO\n");
+        printf("\nDIGITE O TAMANHO DO PROCESSO\n");
         scanf("%i", &process_size);
         if (process_size > memoria_fisica_maxsize)
         {
-            printf("TAMANHO É MAIOR QUE A MEMORIA, DIGITE UM TAMANHO MENOR");
+            printf("\nTAMANHO É MAIOR QUE A MEMORIA, DIGITE UM TAMANHO MENOR");
             scanf("%i", &process_size);
         }
         break;
@@ -171,42 +167,125 @@ void visualizarMemoriaFisica()
     }
 }
 
+void setTamanhoMemoriaFisica()
+{
+    int size = -1;
+    while (size <= 0)
+    {
+        printf("\nDigite o tamanho da memoria fisica\n");
+        scanf("%d", &size);
+        if (size % 2 != 0)
+        {
+            printf("\nO tamanho precisa ser multiplo de dois");
+            setTamanhoMemoriaFisica();
+        }
+        else
+        {
+            memoria_fisica_maxsize = size;
+        }
+    }
+}
+
+void setTamanhoPagina()
+{
+    int size = -1;
+    if (memoria_fisica_maxsize > 0)
+    {
+        while (size <= 0)
+        {
+            printf("\nDigite o tamanho da pagina\n");
+            scanf("%d", &size);
+            if (size < memoria_fisica_maxsize)
+            {
+                if (size % 2 != 0)
+                {
+                    printf("\nO tamanho precisa ser multiplo de dois");
+                    setTamanhoMemoriaFisica();
+                }
+                else
+                {
+                    pagina_maxsize = size;
+                }
+            }
+            else
+            {
+                printf("\nO tamanho da pagina não pode ser maior que a memoria fisica");
+                setTamanhoPagina();
+            }
+        }
+    }
+    else
+    {
+        printf("\nÉ preciso definir o tamanho da memoria fisica \n");
+        setTamanhoMemoriaFisica();
+    }
+}
+
 int main(void)
 {
-
+    memoria_fisica_maxsize = -1;
+    pagina_maxsize = -1;
     int opcao;
     time_t t;
 
     while (opcao != 0)
     {
-        printf("ESCOLHA UMA DAS SEGUINTES OPÇÕES\n");
-        printf("1 - PARA VISUZALIZAR A MEMÓRIA\n");
-        printf("2 - PARA CRIAR UM NOVO PROCESSO\n");
-        printf("3 - PARA VISUALIZAR A TABELA DE PÁGINAS\n");
-        printf("0 - PARA ENCERRAR\n\n");
+        printf("\nESCOLHA UMA DAS SEGUINTES OPÇÕES\n");
+        printf("\n1 - PARA VISUZALIZAR A MEMÓRIA\n");
+        printf("\n2 - PARA CRIAR UM NOVO PROCESSO\n");
+        printf("\n3 - PARA VISUALIZAR A TABELA DE PÁGINAS\n");
+        printf("\n4 - Definir tamanho da memoria fisica\n");
+        printf("\n5 - Definir tamanho da página\n");
+        printf("\n0 - PARA ENCERRAR\n\n");
 
         scanf("%i", &opcao);
 
         switch (opcao)
         {
         case 1:
-            visualizarMemoriaFisica();
+            if (memoria_fisica_maxsize <= 0 || pagina_maxsize <= 0)
+            {
+                printf("\nConfigure o tamanho da memoria fisica e da pagina");
+            }
+            else
+            {
+                visualizarMemoriaFisica();
+            }
             break;
 
         case 2:
-            criarProcesso();
+            if (memoria_fisica_maxsize <= 0 && pagina_maxsize <= 0)
+            {
+                printf("\nConfigure o tamanho da memoria fisica e da pagina");
+            }
+            else
+            {
+                criarProcesso();
+            }
             break;
 
         case 3:
-            visualizarTabelaPagina();
+            if (memoria_fisica_maxsize <= 0 && pagina_maxsize <= 0)
+            {
+                printf("\nConfigure o tamanho da memoria fisica e da pagina");
+            }
+            else
+            {
+                visualizarTabelaPagina();
+            }
             break;
-
+        case 4:
+            setTamanhoMemoriaFisica();
+            break;
+        case 5:
+            setTamanhoPagina();
+            break;
         case 0:
-            printf("ENCERRANDO...\n");
+            printf("\nENCERRANDO...\n");
             break;
 
         default:
-            printf("OPÇÃO INVÁLIDA\n\n");
+            printf("\nOPÇÃO INVÁLIDA\n\n");
         }
     }
 }
