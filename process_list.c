@@ -15,7 +15,7 @@ typedef struct node
 typedef struct list
 {
     Node *head;
-} List;
+} ProcessList;
 
 Node *createnode(process * key)
 {
@@ -31,9 +31,9 @@ Node *createnode(process * key)
     return newNode;
 }
 
-List *makelist()
+ProcessList *makeProcesslist()
 {
-    List *list = malloc(sizeof(List));
+    ProcessList *list = malloc(sizeof(ProcessList));
     if (!list)
     {
         return NULL;
@@ -42,7 +42,7 @@ List *makelist()
     return list;
 }
 
-void display(List *list)
+void displayProcess(ProcessList *list)
 {
     Node *current = list->head;
     if (list->head == NULL)
@@ -57,7 +57,7 @@ void display(List *list)
     }
 }
 
-void add(process * key, List *list)
+void addProcess(process * key, ProcessList *list)
 {
     Node *current = NULL;
     if (list->head == NULL)
@@ -75,7 +75,7 @@ void add(process * key, List *list)
     }
 }
 
-process *pop(List *list)
+process *popProcess(ProcessList *list)
 {
     process *retval;
     Node *next_node = NULL;

@@ -5,20 +5,20 @@
 #include <unistd.h>
 #include "./process_list.c"
 
+
+ProcessList *processes;
 int memoria_fisica_maxsize;
 int pagina_maxsize;
 int * memoria_fisica;
 
-
-
-/* int getRandomValues()
+int getRandomValues()
 {
     int random;
     random = (rand() % 150 + 1);
     return random;
 }
 
-void alocarProcessoNaMemoriaFisica(List *process)
+void alocarProcessoNaMemoriaFisica()
 {
     //to do alocar na memora fisica
 }
@@ -47,20 +47,14 @@ void criarProcesso()
         break;
     }
 
-    //int process[process_size][pagina_maxsize];
-    List *process = makelist();
-    process->id = process_id;
-    process->max_size = process_size;
-    for (size_t i = 0; i < process_size; i++)
+    int page [process_size/pagina_maxsize]; 
+    for (size_t i = 0; i < process_size/pagina_maxsize; i++)
     {
-        int page[pagina_maxsize];
-        for (size_t t = 0; t < pagina_maxsize; t++)
-        {
-            page[t] = getRandomValues();
-        }
-        add(*page, process);
+        page[i] = getRandomValues();
     }
-    display(process);
+
+    process *process = createProcess(process_id, process_size, page, 1);
+    addProcess(process, processes);
 
     alocarProcessoNaMemoriaFisica(process);
 }
@@ -132,17 +126,13 @@ void setTamanhoPagina()
         printf("\nÉ preciso definir o tamanho da memoria fisica \n");
         setTamanhoMemoriaFisica();
     }
-} */
+}
 
 int main(void)
 {
-    List *processes = makelist();
+    processes = makeProcesslist();
 
-    int x[3] = {2,4,5};
-    process * p = createProcess(123, 10, x, 4);
-    add(p, processes);
-    display(processes);
-    /* memoria_fisica_maxsize = -1;
+    memoria_fisica_maxsize = -1;
     pagina_maxsize = -1;
     int opcao;
     time_t t;
@@ -207,5 +197,10 @@ int main(void)
         default:
             printf("\nOPÇÃO INVÁLIDA\n\n");
         }
-    } */
+    }
+
+    int x[3] = {2,4,5};
+    process * p = createProcess(123, 10, x, 4);
+    addProcess(p, processes);
+    displayProcess(processes);
 }
