@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "./process_list.c"
-
+#include "./list.c"
 
 ProcessList *processes;
 int memoria_fisica_maxsize;

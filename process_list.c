@@ -5,21 +5,21 @@
 #include <unistd.h>
 #include "./process.c"
 
-typedef struct node
+typedef struct nodep
 {
     process *p;
-    struct node *next;
+    struct nodep *next;
 
-} Node;
+} NodeP;
 
-typedef struct list
+typedef struct processList
 {
-    Node *head;
+    NodeP *head;
 } ProcessList;
 
-Node *createnode(process * key)
+NodeP *createnodeprocess(process * key)
 {
-    Node *newNode = malloc(sizeof(Node));
+    NodeP *newNode = malloc(sizeof(NodeP));
 
     if (!newNode)
     {
@@ -44,7 +44,7 @@ ProcessList *makeProcesslist()
 
 void displayProcess(ProcessList *list)
 {
-    Node *current = list->head;
+    NodeP *current = list->head;
     if (list->head == NULL)
         return;
 
@@ -59,10 +59,10 @@ void displayProcess(ProcessList *list)
 
 void addProcess(process * key, ProcessList *list)
 {
-    Node *current = NULL;
+    NodeP *current = NULL;
     if (list->head == NULL)
     {
-        list->head = createnode(key);
+        list->head = createnodeprocess(key);
     }
     else
     {
@@ -71,14 +71,14 @@ void addProcess(process * key, ProcessList *list)
         {
             current = current->next;
         }
-        current->next = createnode(key);
+        current->next = createnodeprocess(key);
     }
 }
 
 process *popProcess(ProcessList *list)
 {
     process *retval;
-    Node *next_node = NULL;
+    NodeP *next_node = NULL;
 
     if (list->head == NULL)
     {
