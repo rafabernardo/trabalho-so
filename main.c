@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -52,15 +51,20 @@ void criarProcesso()
             break;
         }
 
-        int page[process_size / pagina_maxsize];
-        for (size_t i = 0; i < process_size / pagina_maxsize; i++)
+        int s = process_size * pagina_maxsize;
+        int page[s];
+        printf("%d page tamanho \n", s);
+        for (size_t i = 0; i < s; i++)
         {
             page[i] = getRandomValues();
+            printf("%d\n", page[i]);
         }
 
-        int posicao = pop(lista_memoria_vazia);
+        int posicao = pop(fisica_tabela);
         process *process = createProcess(process_id, process_size, page, posicao);
         addProcess(process, processes);
+
+        displayProcess(processes);
 
         alocarProcessoNaMemoriaFisica(process);
     } else{
@@ -184,6 +188,7 @@ int main(void)
 
     int opcao;
     time_t t;
+    srand(t);
 
     while (opcao != 0)
     {
@@ -270,9 +275,4 @@ int main(void)
             printf("\nOPÇÃO INVÁLIDA\n\n");
         }
     }
-
-    int x[3] = {2, 4, 5};
-    process *p = createProcess(123, 10, x, 4);
-    addProcess(p, processes);
-    displayProcess(processes);
 }

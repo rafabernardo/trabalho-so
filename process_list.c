@@ -17,7 +17,7 @@ typedef struct processList
     NodeP *head;
 } ProcessList;
 
-NodeP *createnodeprocess(process * key)
+NodeP *createnodeprocess(process *key)
 {
     NodeP *newNode = malloc(sizeof(NodeP));
 
@@ -47,17 +47,15 @@ void displayProcess(ProcessList *list)
     NodeP *current = list->head;
     if (list->head == NULL)
         return;
+    printf("Identificador  - Tamanho\n");
 
     for (; current != NULL; current = current->next)
     {
-        for (size_t i = 0; i <= (sizeof(current->p->pagina)/sizeof(int)); i++)
-        {
-            printf("%d\n", (current->p)->pagina[i]);
-        }        
+        printf("%d               - %d\n", current->p->id, current->p->tamanho);
     }
 }
 
-void addProcess(process * key, ProcessList *list)
+void addProcess(process *key, ProcessList *list)
 {
     NodeP *current = NULL;
     if (list->head == NULL)
