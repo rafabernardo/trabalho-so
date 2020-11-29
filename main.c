@@ -4,13 +4,14 @@
 #include <unistd.h>
 #include "./process_list.c"
 #include "./list.c"
+#include "./tabela.c"
 
-int memoria_fisica_maxsize;
-int pagina_maxsize;
-int process_maxsize;
-int quadro_size;
-int *memoria_fisica;
-List *fisica_tabela;
+int memoria_fisica_maxsize = -1;
+int pagina_maxsize = -1;
+int process_maxsize = -1;
+int quadro_size = -1;
+int *memoria_fisica = NULL;
+ListTabela *tabela;
 List *lista_memoria_vazia;
 ProcessList *processes;
 
@@ -21,69 +22,88 @@ int getRandomValues()
     return random;
 }
 
-void alocarProcessoNaMemoriaFisica()
-{
-    //to do alocar na memora fisica
-}
-
 void criarProcesso()
 {
-    if(process_maxsize > 0 ){
-        int process_id;
-        int process_size;
-
-        while (process_size != 0)
+    if (process_maxsize > 0)
+    {
+        if (lista_memoria_vazia->size > 0)
         {
-            printf("\nDIGITE O TAMANHO DO PROCESSO\n");
-            scanf("%i", &process_size);
-            if (process_size > process_maxsize)
+            int process_id = -1;
+            int process_size = -1;
+
+            while (process_id < 0)
             {
-                printf("\nTAMANHO É MAIOR QUE O TAMANHO MAXIMO DO PROCESSO, DIGITE UM TAMANHO MENOR\n");
-                scanf("%i", &process_size);
+                printf("DIGITE O ID DO PROCESSO\n");
+                scanf("%i", &process_id);
+                break;
             }
-            break;
+
+            while (process_size < 0)
+            {
+                printf("\nDIGITE O TAMANHO DO PROCESSO\n");
+                scanf("%i", &process_size);
+                if (process_size > process_maxsize)
+                {
+                    printf("\nTAMANHO É MAIOR QUE O TAMANHO MAXIMO DO PROCESSO, DIGITE UM TAMANHO MENOR\n");
+                    scanf("%i", &process_size);
+                }
+            }
+
+            int s = process_size / pagina_maxsize;
+            int page[s];
+            for (size_t i = 0; i < s; i++)
+            {
+                page[i] = getRandomValues();
+            }
+
+            int index_tabela;
+            for (int i = 0; i < s; i++)
+            {
+                if (i == 0)
+                {
+                    int posicao = getRandom(lista_memoria_vazia);
+                    index_tabela = addTabela(i, posicao, tabela);
+                    memoria_fisica[posicao] = i;
+                }
+                else
+                {
+                    int posicao = getRandom(lista_memoria_vazia);
+                    addTabela(i, posicao, tabela);
+                    memoria_fisica[posicao] = i;
+                }
+            }
+
+            process *process = createProcess(process_id, process_size, page, index_tabela);
+            addProcess(process, processes);
+
+            displayProcess(processes);
+        }else{
+            printf("Memoria cheia\n");
         }
-
-        while (process_id != 0)
-        {
-            printf("DIGITE O ID DO PROCESSO\n");
-            scanf("%i", &process_id);
-            break;
-        }
-
-        int s = process_size * pagina_maxsize;
-        int page[s];
-        printf("%d page tamanho \n", s);
-        for (size_t i = 0; i < s; i++)
-        {
-            page[i] = getRandomValues();
-            printf("%d\n", page[i]);
-        }
-
-        int posicao = pop(fisica_tabela);
-        process *process = createProcess(process_id, process_size, page, posicao);
-        addProcess(process, processes);
-
-        displayProcess(processes);
-
-        alocarProcessoNaMemoriaFisica(process);
-    } else{
+    }
+    else
+    {
         printf("Defina um tamanho maximo do processo");
     }
 }
 
 void visualizarTabelaPagina()
 {
-    printf("executar função visualizar tabeça de paginas\n\n");
+    printf("TABELA DE PAGINA\n");
+    displayTabela(tabela);
 }
 
 void visualizarMemoriaFisica()
 {
-    printf("Exibir memória física\n");
-    printf("Lista mem tabela: \n");
-    display(fisica_tabela);
-    printf("Lista mem tabela: \n");
-    display(lista_memoria_vazia);
+    printf("MEMORIA FISICA\n");
+    printf("Tamanho total: %d\n", memoria_fisica_maxsize);
+    int tamanho = (lista_memoria_vazia->size * 100) / memoria_fisica_maxsize;
+    printf("Tamanho livre: %d%%\n", tamanho);
+
+    for (int i = 0; i < memoria_fisica_maxsize; i++)
+    {
+        printf("%i - %d\n", i, memoria_fisica[i]);
+    }
 }
 
 void setTamanhoMemoriaFisica()
@@ -128,6 +148,7 @@ void setTamanhoPagina()
         else
         {
             pagina_maxsize = size;
+            processes->page_size = size;
         }
     }
 }
@@ -153,38 +174,19 @@ void setTamanhoMaxProcesso()
 
 void createListasMemoriaFisica()
 {
-    int tam_lista_tabela;
-    int tam_lista_vazia;
-    if ((quadro_size % 2) != 0)
+    memoria_fisica = malloc(sizeof(int) * memoria_fisica_maxsize);
+    for (int i = 0; i < memoria_fisica_maxsize; i++)
     {
-        tam_lista_vazia = quadro_size / 2;
-        tam_lista_tabela = (quadro_size / 2) + 1;
-    }
-    else
-    {
-        tam_lista_vazia = quadro_size / 2;
-        tam_lista_tabela = quadro_size / 2;
-    }
-
-    for (int i = 0; i < tam_lista_tabela; i++)
-    {
+        memoria_fisica[i] = 0;
         add(i, lista_memoria_vazia);
-    }
-    for (int j = tam_lista_tabela; j < (tam_lista_tabela + tam_lista_vazia); j++)
-    {
-        add(j, fisica_tabela);
     }
 }
 
 int main(void)
 {
     processes = makeProcesslist();
-    fisica_tabela = makeList();
+    tabela = makeListTabela();
     lista_memoria_vazia = makeList();
-
-    memoria_fisica_maxsize = -1;
-    pagina_maxsize = -1;
-    process_maxsize = -1;
 
     int opcao;
     time_t t;
@@ -249,8 +251,7 @@ int main(void)
                 printf("%d maxPagina\n", pagina_maxsize);
                 if (memoria_fisica == NULL)
                 {
-                    quadro_size = memoria_fisica_maxsize / pagina_maxsize;
-                    createListasMemoriaFisica(quadro_size);
+                    createListasMemoriaFisica();
                 }
             }
             break;
@@ -275,4 +276,13 @@ int main(void)
             printf("\nOPÇÃO INVÁLIDA\n\n");
         }
     }
+
+    /*  add(1, fisica_tabela);
+    add(7, fisica_tabela);
+    add(3, fisica_tabela);
+    add(8, fisica_tabela);
+    Node *teste = getRandom(fisica_tabela);
+    printf("%d numero", teste->p);
+    printf("------------------------");
+    display(fisica_tabela); */
 }

@@ -15,6 +15,8 @@ typedef struct nodep
 typedef struct processList
 {
     NodeP *head;
+    int page_size;
+
 } ProcessList;
 
 NodeP *createnodeprocess(process *key)
@@ -52,6 +54,12 @@ void displayProcess(ProcessList *list)
     for (; current != NULL; current = current->next)
     {
         printf("%d               - %d\n", current->p->id, current->p->tamanho);
+        printf("Paginas %d\n", current->p->tamanho);
+        for (size_t i = 0; i < (current->p->tamanho/list->page_size); i++)
+        {
+            printf("%d\n", current->p->pagina[i]);
+        }
+        
     }
 }
 

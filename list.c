@@ -5,15 +5,17 @@ typedef struct node
 {
     int p;
     struct node *next;
+    struct node *prev;
 
-}Node;
+} Node;
 
 typedef struct list
 {
     Node *head;
-}List;
+    int size;
+} List;
 
-Node *createnode(int key)
+Node *createnode(int key, Node *prev)
 {
     Node *newNode = malloc(sizeof(Node));
 
@@ -24,6 +26,7 @@ Node *createnode(int key)
 
     newNode->p = key;
     newNode->next = NULL;
+    newNode->prev = prev;
     return newNode;
 }
 
@@ -56,7 +59,8 @@ void add(int key, List *list)
     Node *current = NULL;
     if (list->head == NULL)
     {
-        list->head = createnode(key);
+        list->head = createnode(key, NULL);
+        list->size++;
     }
     else
     {
@@ -65,7 +69,8 @@ void add(int key, List *list)
         {
             current = current->next;
         }
-        current->next = createnode(key);
+        current->next = createnode(key, current);
+        list->size++;
     }
 }
 
@@ -83,6 +88,46 @@ int pop(List *list)
     retval = list->head->p;
     free(list->head);
     list->head = next_node;
+    list->size--;
 
     return retval;
+}
+
+Node *getAt(int key, List *list)
+{
+    Node *current = list->head;
+    int count = 1;
+    while (current != NULL)
+    {
+        if (count == key)
+        {
+            return current;
+        }
+        count++;
+        current = current->next;
+    }
+    return NULL;
+}
+
+int getRandom(List *list)
+{
+    int key = (rand() % list->size);
+    int count = 0;
+    Node *current = list->head;
+    Node *previous = current;
+    while (current != NULL)
+    {
+        if (count == key)
+        {
+            previous->next = current->next;
+            if (current == list->head)
+                list->head = current->next;
+            list->size--;
+            return current->p;
+        }
+        previous = current;
+        current = current->next;
+        count++;
+    }
+    return -1;
 }
