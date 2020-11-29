@@ -3,103 +3,15 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "./process_list.c"
 
 int memoria_fisica_maxsize;
-int memoria_logica_maxsize;
 int pagina_maxsize;
-int memoria_fisica[20];
+int * memoria_fisica;
 
-typedef struct node
-{
-    int key;
-    int page;
-    struct node *next;
 
-} Node;
 
-typedef struct list
-{
-    Node *head;
-    int size;
-    int max_size;
-    int id;
-} List;
-
-Node *createnode(int key)
-{
-    Node *newNode = malloc(sizeof(Node));
-
-    if (!newNode)
-    {
-        return NULL;
-    }
-
-    newNode->key = key;
-    newNode->next = NULL;
-    return newNode;
-}
-
-List *makelist()
-{
-    List *list = malloc(sizeof(List));
-    if (!list)
-    {
-        return NULL;
-    }
-    list->head = NULL;
-    return list;
-}
-
-void display(List *list)
-{
-    Node *current = list->head;
-    if (list->head == NULL)
-        return;
-
-    for (; current != NULL; current = current->next)
-    {
-        printf("%d\n", current->key);
-    }
-}
-
-void add(int key, List *list)
-{
-    Node *current = NULL;
-    if (list->head == NULL)
-    {
-        list->head = createnode(key);
-    }
-    else
-    {
-        current = list->head;
-        while (current->next != NULL)
-        {
-            current = current->next;
-        }
-        current->next = createnode(key);
-    }
-    list->size++;
-}
-
-int pop(List *list)
-{
-    int retval = -1;
-    Node *next_node = NULL;
-
-    if (list->head == NULL)
-    {
-        return -1;
-    }
-
-    next_node = (list->head)->next;
-    retval = (list->head)->key;
-    free(list->head);
-    list->head = next_node;
-
-    return retval;
-}
-
-int getRandomValues()
+/* int getRandomValues()
 {
     int random;
     random = (rand() % 150 + 1);
@@ -148,6 +60,7 @@ void criarProcesso()
         }
         add(*page, process);
     }
+    display(process);
 
     alocarProcessoNaMemoriaFisica(process);
 }
@@ -219,11 +132,17 @@ void setTamanhoPagina()
         printf("\nÉ preciso definir o tamanho da memoria fisica \n");
         setTamanhoMemoriaFisica();
     }
-}
+} */
 
 int main(void)
 {
-    memoria_fisica_maxsize = -1;
+    List *processes = makelist();
+
+    int x[3] = {2,4,5};
+    process * p = createProcess(123, 10, x, 4);
+    add(p, processes);
+    display(processes);
+    /* memoria_fisica_maxsize = -1;
     pagina_maxsize = -1;
     int opcao;
     time_t t;
@@ -276,6 +195,7 @@ int main(void)
             break;
         case 4:
             setTamanhoMemoriaFisica();
+            memoria_fisica[memoria_fisica_maxsize];
             break;
         case 5:
             setTamanhoPagina();
@@ -287,5 +207,5 @@ int main(void)
         default:
             printf("\nOPÇÃO INVÁLIDA\n\n");
         }
-    }
+    } */
 }
