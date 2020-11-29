@@ -6,10 +6,14 @@
 #include "./process_list.c"
 #include "./list.c"
 
-ProcessList *processes;
 int memoria_fisica_maxsize;
 int pagina_maxsize;
-int * memoria_fisica;
+int process_maxsize;
+int quadro_size;
+int *memoria_fisica;
+List *fisica_tabela;
+List *lista_memoria_vazia;
+ProcessList *processes;
 
 int getRandomValues()
 {
@@ -25,38 +29,43 @@ void alocarProcessoNaMemoriaFisica()
 
 void criarProcesso()
 {
-    int process_id;
-    int process_size;
+    if(process_maxsize > 0 ){
+        int process_id;
+        int process_size;
 
-    while (process_size != 0 && process_size > memoria_fisica_maxsize)
-    {
-        printf("\nDIGITE O TAMANHO DO PROCESSO\n");
-        scanf("%i", &process_size);
-        if (process_size > memoria_fisica_maxsize)
+        while (process_size != 0)
         {
-            printf("\nTAMANHO É MAIOR QUE A MEMORIA, DIGITE UM TAMANHO MENOR");
+            printf("\nDIGITE O TAMANHO DO PROCESSO\n");
             scanf("%i", &process_size);
+            if (process_size > process_maxsize)
+            {
+                printf("\nTAMANHO É MAIOR QUE O TAMANHO MAXIMO DO PROCESSO, DIGITE UM TAMANHO MENOR\n");
+                scanf("%i", &process_size);
+            }
+            break;
         }
-        break;
+
+        while (process_id != 0)
+        {
+            printf("DIGITE O ID DO PROCESSO\n");
+            scanf("%i", &process_id);
+            break;
+        }
+
+        int page[process_size / pagina_maxsize];
+        for (size_t i = 0; i < process_size / pagina_maxsize; i++)
+        {
+            page[i] = getRandomValues();
+        }
+
+        int posicao = pop(lista_memoria_vazia);
+        process *process = createProcess(process_id, process_size, page, posicao);
+        addProcess(process, processes);
+
+        alocarProcessoNaMemoriaFisica(process);
+    } else{
+        printf("Defina um tamanho maximo do processo");
     }
-
-    while (process_id != 0)
-    {
-        printf("DIGITE O ID DO PROCESSO\n");
-        scanf("%i", &process_id);
-        break;
-    }
-
-    int page [process_size/pagina_maxsize]; 
-    for (size_t i = 0; i < process_size/pagina_maxsize; i++)
-    {
-        page[i] = getRandomValues();
-    }
-
-    process *process = createProcess(process_id, process_size, page, 1);
-    addProcess(process, processes);
-
-    alocarProcessoNaMemoriaFisica(process);
 }
 
 void visualizarTabelaPagina()
@@ -66,12 +75,11 @@ void visualizarTabelaPagina()
 
 void visualizarMemoriaFisica()
 {
-    printf("processo -- quadro \n");
-    for (int i = 0; i < memoria_fisica_maxsize; i++)
-    {
-
-        printf("%d -- %d \n", i, memoria_fisica[i]);
-    }
+    printf("Exibir memória física\n");
+    printf("Lista mem tabela: \n");
+    display(fisica_tabela);
+    printf("Lista mem tabela: \n");
+    display(lista_memoria_vazia);
 }
 
 void setTamanhoMemoriaFisica()
@@ -81,14 +89,22 @@ void setTamanhoMemoriaFisica()
     {
         printf("\nDigite o tamanho da memoria fisica\n");
         scanf("%d", &size);
-        if (size % 2 != 0)
+        if (size > pagina_maxsize)
         {
-            printf("\nO tamanho precisa ser multiplo de dois");
-            setTamanhoMemoriaFisica();
+            if (size % 2 != 0)
+            {
+                printf("\nO tamanho precisa ser multiplo de dois");
+                setTamanhoMemoriaFisica();
+            }
+            else
+            {
+                memoria_fisica_maxsize = size;
+            }
         }
         else
         {
-            memoria_fisica_maxsize = size;
+            printf("\nTamanho da memoria precisa ser maior que o da pagina");
+            setTamanhoMemoriaFisica();
         }
     }
 }
@@ -96,44 +112,76 @@ void setTamanhoMemoriaFisica()
 void setTamanhoPagina()
 {
     int size = -1;
-    if (memoria_fisica_maxsize > 0)
+    while (size <= 0)
     {
-        while (size <= 0)
+        printf("\nDigite o tamanho da pagina\n");
+        scanf("%d", &size);
+        if (size % 2 != 0)
         {
-            printf("\nDigite o tamanho da pagina\n");
-            scanf("%d", &size);
-            if (size < memoria_fisica_maxsize)
-            {
-                if (size % 2 != 0)
-                {
-                    printf("\nO tamanho precisa ser multiplo de dois");
-                    setTamanhoMemoriaFisica();
-                }
-                else
-                {
-                    pagina_maxsize = size;
-                }
-            }
-            else
-            {
-                printf("\nO tamanho da pagina não pode ser maior que a memoria fisica");
-                setTamanhoPagina();
-            }
+            printf("\nO tamanho precisa ser multiplo de dois");
+            setTamanhoPagina();
         }
+        else
+        {
+            pagina_maxsize = size;
+        }
+    }
+}
+
+void setTamanhoMaxProcesso()
+{
+    int size = -1;
+    while (size <= 0)
+    {
+        printf("\nDigite o tamanho maximo do processo\n");
+        scanf("%d", &size);
+        if (size % 2 != 0)
+        {
+            printf("\nO tamanho precisa ser multiplo de dois");
+            setTamanhoMaxProcesso();
+        }
+        else
+        {
+            process_maxsize = size;
+        }
+    }
+}
+
+void createListasMemoriaFisica()
+{
+    int tam_lista_tabela;
+    int tam_lista_vazia;
+    if ((quadro_size % 2) != 0)
+    {
+        tam_lista_vazia = quadro_size / 2;
+        tam_lista_tabela = (quadro_size / 2) + 1;
     }
     else
     {
-        printf("\nÉ preciso definir o tamanho da memoria fisica \n");
-        setTamanhoMemoriaFisica();
+        tam_lista_vazia = quadro_size / 2;
+        tam_lista_tabela = quadro_size / 2;
+    }
+
+    for (int i = 0; i < tam_lista_tabela; i++)
+    {
+        add(i, lista_memoria_vazia);
+    }
+    for (int j = tam_lista_tabela; j < (tam_lista_tabela + tam_lista_vazia); j++)
+    {
+        add(j, fisica_tabela);
     }
 }
 
 int main(void)
 {
     processes = makeProcesslist();
+    fisica_tabela = makeList();
+    lista_memoria_vazia = makeList();
 
     memoria_fisica_maxsize = -1;
     pagina_maxsize = -1;
+    process_maxsize = -1;
+
     int opcao;
     time_t t;
 
@@ -145,6 +193,7 @@ int main(void)
         printf("\n3 - PARA VISUALIZAR A TABELA DE PÁGINAS\n");
         printf("\n4 - Definir tamanho da memoria fisica\n");
         printf("\n5 - Definir tamanho da página\n");
+        printf("\n6 - Definir tamanho maximo de processo\n");
         printf("\n0 - PARA ENCERRAR\n\n");
 
         scanf("%i", &opcao);
@@ -184,11 +233,34 @@ int main(void)
             }
             break;
         case 4:
-            setTamanhoMemoriaFisica();
-            memoria_fisica[memoria_fisica_maxsize];
+            if (pagina_maxsize <= 0)
+            {
+                printf("\nDefina o tamanho da pagina\n");
+            }
+            else
+            {
+                setTamanhoMemoriaFisica();
+                printf("%d maxMemoria\n", memoria_fisica_maxsize);
+                printf("%d maxPagina\n", pagina_maxsize);
+                if (memoria_fisica == NULL)
+                {
+                    quadro_size = memoria_fisica_maxsize / pagina_maxsize;
+                    createListasMemoriaFisica(quadro_size);
+                }
+            }
             break;
         case 5:
             setTamanhoPagina();
+            break;
+        case 6:
+            if (memoria_fisica_maxsize <= 0)
+            {
+                printf("\nDefina o tamanho da memoria fisica\n");
+            }
+            else
+            {
+                setTamanhoMaxProcesso();
+            }
             break;
         case 0:
             printf("\nENCERRANDO...\n");
@@ -199,8 +271,8 @@ int main(void)
         }
     }
 
-    int x[3] = {2,4,5};
-    process * p = createProcess(123, 10, x, 4);
+    int x[3] = {2, 4, 5};
+    process *p = createProcess(123, 10, x, 4);
     addProcess(p, processes);
     displayProcess(processes);
 }
